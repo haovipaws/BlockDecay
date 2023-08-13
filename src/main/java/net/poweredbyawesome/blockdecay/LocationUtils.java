@@ -15,6 +15,6 @@ public class LocationUtils {
 
     public static Location stringToLoc(String s) {
         String[] loc = s.split("~");
-        return new Location(Bukkit.getWorld(loc[0]),Double.valueOf(loc[1]),Double.valueOf(loc[2]),Double.valueOf(loc[3]));
+        return new Location(Bukkit.getWorld(loc[0]),Double.parseDouble(loc[1]),Double.parseDouble(loc[2]),Double.parseDouble(loc[3]));
     }
 }

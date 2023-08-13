@@ -9,6 +9,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -16,11 +18,12 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 public final class BlockDecay extends JavaPlugin implements Listener {
 
     int defaultDecay;
-    private Map<Location, Long> blocks = new HashMap<>();
+    private final Map<Location, Long> blocks = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -50,7 +53,7 @@ public final class BlockDecay extends JavaPlugin implements Listener {
     }
 
     public void loadBlocks() {
-        ConfigurationSection section = getBlockStorage().getConfigurationSection("blocks");
+        ConfigurationSection section = Objects.requireNonNull(getBlockStorage()).getConfigurationSection("blocks");
         if (section == null) {
             return;
         }
@@ -61,23 +64,25 @@ public final class BlockDecay extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent ev) {
-        String mat = ev.getBlock().getType().toString();
+        String matString = ev.getBlock().getType().toString();
+        Material mat = ev.getBlock().getType();
         if (!getConfig().getStringList("worlds").contains(ev.getBlock().getWorld().getName())) {
             return;
         }
-        if (!(getConfig().getStringList("whitelist").contains(mat) || getConfig().getConfigurationSection("decay").getKeys(false).contains(mat))) {
+        if (!(getConfig().getStringList("whitelist").contains(matString) || getConfig().getConfigurationSection("decay").getKeys(false).contains(matString))) {
             return;
         }
 
         if (!ev.getPlayer().hasPermission("blockdecay.bypass")) {
-            int decayTime = getConfig().getInt("decay."+mat+".time", defaultDecay);
+            int decayTime = getConfig().getInt("decay."+matString+".time", defaultDecay);
             if (decayTime < 300) {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
                     @Override
                     public void run() {
                         ev.getBlock().setType(Material.valueOf(getConfig().getString("default.material")));
+                        ev.getPlayer().getInventory().addItem(new ItemStack(mat, 1));
                     }
-                }, decayTime * 20);
+                }, decayTime * 20L);
             } else {
                 blocks.put(ev.getBlock().getLocation(), getEpoch() + decayTime);
             }

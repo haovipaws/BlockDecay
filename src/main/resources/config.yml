@@ -6,21 +6,12 @@ default:
 
 #Blocks that will decay once placed, it will use the default time.
 whitelist:
-  - GRAVEL
   - WOOL
-  - CONCRETE_POWDER
-  - STAINED_GLASS
 
 #Blocks with custom decay time
 decay:
-  DIRT:
-    time: 1
   WOOD:
-    time: 2
-  COBBLESTONE:
-    time: 3
-  SNOW_BLOCK:
-    time: 10
+    time: 5
 
 #Enabled worlds where blocks will decay.
 worlds:
