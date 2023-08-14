@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.bukkit.material.Wool;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -66,6 +67,7 @@ public final class BlockDecay extends JavaPlugin implements Listener {
     public void onBlockPlace(BlockPlaceEvent ev) {
         String matString = ev.getBlock().getType().toString();
         Material mat = ev.getBlock().getType();
+        byte matType = ev.getBlock().getData();
         if (!getConfig().getStringList("worlds").contains(ev.getBlock().getWorld().getName())) {
             return;
         }
@@ -79,8 +81,10 @@ public final class BlockDecay extends JavaPlugin implements Listener {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
                     @Override
                     public void run() {
+                        if (!Objects.equals(ev.getBlock().getType().toString(), getConfig().getString("default.material"))) {
+                            ev.getPlayer().getInventory().addItem(new ItemStack(mat, 1, matType));
+                        }
                         ev.getBlock().setType(Material.valueOf(getConfig().getString("default.material")));
-                        ev.getPlayer().getInventory().addItem(new ItemStack(mat, 1));
                     }
                 }, decayTime * 20L);
             } else {
